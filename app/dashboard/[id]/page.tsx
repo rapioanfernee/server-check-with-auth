@@ -1,10 +1,14 @@
 "use client";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 const Dashboard = ({ params }: { params: { id: string } }) => {
+  const router = useRouter();
+
   const [errorMessage, setErrorMessage] = useState("");
   const [user, setUser] = useState<any>({});
+  const [logoutMessage, setLogoutMessage] = useState("");
 
   const fetchUser = async () => {
     const response = await fetch(`http://localhost:3000/user/${params.id}`, {
@@ -16,7 +20,20 @@ const Dashboard = ({ params }: { params: { id: string } }) => {
       setErrorMessage(data.message);
     }
     setUser(data);
-    console.log(data);
+  };
+
+  const onClickLogoutButton = async () => {
+    const response = await fetch("http://localhost:3000/auth/logout", {
+      method: "GET",
+      credentials: "include",
+    });
+
+    const data = await response.json();
+    if (data.msg) {
+      setLogoutMessage(data.msg);
+    }
+
+    router.replace("/");
   };
 
   useEffect(() => {
@@ -29,6 +46,15 @@ const Dashboard = ({ params }: { params: { id: string } }) => {
         <div>
           <h2>Unauthorized!</h2>
           <div>{errorMessage}</div>
+          <button
+            className="text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-full text-sm px-5 py-2.5 me-2 mb-2 dark:bg-gray-800 dark:hover:bg-gray-700 dark:focus:ring-gray-700 dark:border-gray-700"
+            onClick={onClickLogoutButton}
+          >
+            Logout
+          </button>
+          {logoutMessage && (
+            <div className="text-green-500">{logoutMessage}</div>
+          )}
         </div>
       ) : (
         <div>
